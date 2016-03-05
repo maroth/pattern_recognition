@@ -13,7 +13,6 @@ executable ex1
   build-depends:       base >=4.7 && <4.8,
                        bytestring,
                        vector,
-                       cassava,
                        parsec
   default-language:    Haskell2010
 

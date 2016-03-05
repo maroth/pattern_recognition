@@ -2,7 +2,6 @@ module Main where
 
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.Vector as V
-import Data.Csv
 import Data.List (sortBy, groupBy, minimumBy)
 import Data.Function (on)
 import Data.Ord (comparing)
