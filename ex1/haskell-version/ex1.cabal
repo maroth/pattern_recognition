@@ -1,0 +1,24 @@
+name:                ex1
+version:             0.1.0.0
+synopsis:            Pattern Recognition: Exercise 1 
+description:         K-Nearest-Neighbor
+author:              Markus Roth
+maintainer:          maroth@gmail.com
+build-type:          Simple
+cabal-version:       >=1.10
+
+executable ex1
+  ghc-options:         -Wall
+  main-is:             Main.hs
+  build-depends:       base >=4.7 && <4.8,
+                       bytestring,
+                       vector,
+                       cassava,
+                       parsec
+  default-language:    Haskell2010
+
+Test-Suite test-ex1
+  type:                detailed-0.9
+  test-module:         TestEx1
+  build-depends:       base, Cabal >= 1.9.2
+  default-language:    Haskell2010
