@@ -5,6 +5,7 @@ import Data.List (sortBy, groupBy, minimumBy)
 import Data.Ord (comparing)
 import Text.ParserCombinators.Parsec
 
+--data type
 data Letter = Letter Int [Float] deriving (Show)
 
 value :: Letter -> Int
@@ -13,6 +14,7 @@ value (Letter val _ ) = val
 feature :: Letter -> [Float]
 feature (Letter _ feat ) = feat
 
+--k nearest neighbor
 minkowskiDistance :: Float -> [Float] -> [Float] -> Float
 minkowskiDistance m xs ps = (sum $ zipWith (\x p -> abs $ (x - p) ** m) xs ps) ** (1 / m)
 
@@ -28,6 +30,19 @@ vote tieBreaker neighbors = breakTie $ takeWhileSameLength $ sortByLength $ grou
     groupByValue a = groupBy ((==) `on` value) a
     breakTie a = if length a == 1 then value $ head $ head a else value $ minimumBy (comparing tieBreaker) (concat a)
 
+calculate :: [Letter] -> [Letter] -> Int -> Float -> Double
+calculate trainSet testSet k minkowskiParam = fractionCorrect where
+    distancemetric = minkowskiDistance minkowskiParam
+    tieBreaker = (\a b -> minkowskiDistance minkowskiParam (feature a) (feature b))
+    isCorrect result testedLetter = (value testedLetter) == result
+    doKnn test = vote (tieBreaker test) (kNearestNeighbor distancemetric trainSet test k)
+    results = [isCorrect (doKnn test) test | test <- testSet]
+    correctResults = length (filter (\x -> x == True) results)
+    totalResults = length results
+    fractionCorrect = (fromIntegral correctResults) / (fromIntegral totalResults)
+
+
+--parsing
 toLetter :: [String] -> Letter
 toLetter [] = error "empty list"
 toLetter (l:f) = Letter (read l :: Int) (map (\x -> read x :: Float) f)
@@ -35,7 +50,7 @@ toLetter (l:f) = Letter (read l :: Int) (map (\x -> read x :: Float) f)
 main :: IO ()
 main = do
     trainFile <- readFile "../train.csv"
-    testFile <- readFile "../test_short.csv"
+    testFile <- readFile "../test.csv"
 
     let parseFile = parseCsv where
         parseCsv = parse csvFile "unknown" 
@@ -52,12 +67,10 @@ main = do
         Right train -> case csvTestSet of 
             Left testError -> do putStrLn "Error parsing Test CSV"
                                  print testError
-            Right test -> do let distancemetric = minkowskiDistance 2
-                             let testSet = [toLetter x | x <- test, x /= [""]]
-                             let trainSet = [toLetter x | x <- train, x /= [""]]
-                             let tieBreaker = (\l -> feature l !! 1)
-                             let results = [value test == vote tieBreaker (kNearestNeighbor distancemetric trainSet test 5) | test <- testSet]
-                             let correctResults = length (filter (\x -> x == True) results)
-                             let totalResults = length results
-                             let fractionCorrect = (fromIntegral correctResults) / (fromIntegral totalResults)
-                             print $ show fractionCorrect
+            Right test -> do let toSet csv = [toLetter x | x <- csv, x /= [""]]
+                             let testSetSize = 100
+                             let trainSetSize = length train
+                             let showResult minkowskiParam k = "Accuracy for K = " ++ (show k) ++ " and Minkowski Parameter = " ++ (show minkowskiParam) ++ ": " ++ show (calculate (toSet (take trainSetSize train)) (toSet (take testSetSize test)) k minkowskiParam)
+                             let resultStrings = [showResult minkowskiParam k | k <- [1, 3, 5, 10, 15], minkowskiParam <- [1, 2]]
+                             let details = "Test set size: " ++ show testSetSize ++ ", Train set size: " ++ show trainSetSize
+                             putStr $ unlines ([details] ++ resultStrings)
