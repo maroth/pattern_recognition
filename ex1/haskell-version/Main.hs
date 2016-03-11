@@ -1,7 +1,7 @@
 module Main where
 
-import Data.List (sortBy, groupBy, minimumBy)
 import Data.Function (on)
+import Data.List (sortBy, groupBy, minimumBy)
 import Data.Ord (comparing)
 import Text.ParserCombinators.Parsec
 
@@ -28,44 +28,21 @@ vote tieBreaker neighbors = breakTie $ takeWhileSameLength $ sortByLength $ grou
     groupByValue a = groupBy ((==) `on` value) a
     breakTie a = if length a == 1 then value $ head $ head a else value $ minimumBy (comparing tieBreaker) (concat a)
 
-csvFile :: GenParser Char st [[String]]
-csvFile =
-    do result <- many line
-       eof
-       return result
-
-line :: GenParser Char st [String]
-line =
-    do result <- cells
-       _ <- eol
-       return result
-
-cells :: GenParser Char st [String]
-cells =
-    do first <- cellContent
-       next <- remainingCells
-       return (first : next)
-
-remainingCells :: GenParser Char st [String]
-remainingCells =
-    (char ',' >> cells)
-    <|> (return [])
-
-cellContent :: GenParser Char st String
-cellContent =
-    many (noneOf ",\n")
-
-eol :: GenParser Char st Char
-eol = char '\n'
-
-parseCsv :: String -> Either ParseError [[String]]
-parseCsv input = parse csvFile ("unknown") input
-
 toLetter :: [String] -> Letter
 toLetter [] = error "empty letter"
 toLetter (l:f) = Letter (read l :: Int) (map (\x -> read x :: Float) f)
 
 main :: IO ()
 main = do
-    csvData <- readFile "../train.csv"
-    print $ parseCsv (csvData ++ "\n")
+    trainFile <- readFile "../train_small.csv"
+    let csvTrainingSet = parseCsv trainFile where
+        parseCsv = parse csvFile "unknown" 
+        csvFile = sepBy line (char '\n')
+        line = sepBy cell (char ',')
+        cell =  many (noneOf "\n\r,")
+
+    case csvTrainingSet of 
+        Left e -> do putStrLn "Error parsing CSV"
+                     print e
+        Right r -> do print $ map toLetter r
+        --Right r -> do print r
