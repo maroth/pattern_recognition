@@ -1,7 +1,7 @@
 module Main where
 
 import Data.Function (on)
-import Data.List (sortBy, groupBy, minimumBy)
+import Data.List (sortBy, groupBy, minimumBy, transpose)
 import Data.Ord (comparing)
 import Text.ParserCombinators.Parsec
 
@@ -14,12 +14,24 @@ value (Letter val _ ) = val
 feature :: Letter -> [Float]
 feature (Letter _ feat ) = feat
 
+data Cluster = Cluster [Letter] deriving (Show)
+
 --k nearest neighbor
 minkowskiDistance :: Float -> [Float] -> [Float] -> Float
 minkowskiDistance m xs ps = (sum $ zipWith (\x p -> abs $ (x - p) ** m) xs ps) ** (1 / m)
 
 --K-Means Clustering
-cluster ::
+clusterCenter :: Cluster -> [Float]
+clusterCenter [] = []
+clusterCenter items = map (normalize . sum) $ transpose $ map feature items where
+                          normalize a = a / fromIntegral (length items)
+
+nearestCluster :: [Cluster] -> Letter -> Cluster
+nearestCluster [] _ = []
+nearestCluster (singleCluster:[]) _ = singleCluster
+nearestCluster clusters letter = fst $ minimumBy compare [(cluster, distanceTo cluster) | cluster <- clusters] where
+                                     distanceTo cluster = minkowskiDistance 2 (feature letter) (clusterCenter cluster) 
+                                     compare a b = compare (snd a) (snd b)
 
 
 --parsing
@@ -46,4 +58,4 @@ main = do
         Right train -> do let toSet csv = [toLetter x | x <- csv, x /= [""]]
                           let dataSetSize = 40
                           let details = "Data set size: " ++ show dataSetSize 
-                          putStr $ unlines ([welcome, details] ++ resultStrings)
+                          putStr $ unlines ([welcome, details])
