@@ -1,11 +1,16 @@
 module Main where
 
-import KMeansClustering
+import KMeansClustering 
 import Text.ParserCombinators.Parsec
+
+--parsing
+toLetter :: [String] -> KMeansClustering.Letter
+toLetter [] = error "empty list"
+toLetter (l:f) = KMeansClustering.Letter (read l :: Int) (map (\x -> read x :: Float) f)
 
 main :: IO ()
 main = do
-    dataSetFile <- readFile "../all.csv"
+    dataSetFile <- readFile "../all_short.csv"
 
     let csvDataSet = parseCsv dataSetFile where
         parseCsv = parse csvFile "unknown" 
@@ -13,13 +18,21 @@ main = do
         line = sepBy cell (char ',')
         cell =  many (noneOf "\n\r,")
 
-    let welcome = "Clustering with K-Means Clustering"
 
     case csvDataSet of 
-        Left trainError -> do putStrLn "Error parsing CSV"
-                              print trainError
+            Left trainError -> do putStrLn "Error parsing CSV"
+                                  print trainError
+     
+            Right dataSet -> do let toSet csv = [toLetter x | x <- csv, x /= [""]]
+                                let dataSetSize = 20
+                                let welcome = "Clustering with K-Means Clustering"
+                                let details = "Data set size: " ++ show dataSetSize 
+                                    
+                                let toSet csv = [toLetter x | x <- csv, x /= [""]]
 
-        Right train -> do let toSet csv = [toLetter x | x <- csv, x /= [""]]
-                          let dataSetSize = 4
-                          let details = "Data set size: " ++ show dataSetSize 
-                          putStr $ unlines ([welcome, details])
+                                let clusters numberOfClusters numberOfIterations = KMeansClustering.calculate(toSet(take dataSetSize dataSet)) numberOfClusters numberOfIterations
+                                let showCluster cluster = [value letter | letter <- cluster]
+                                let showResult clusters = show $ concat [showCluster cluster | cluster <- clusters]
+                                let resultStrings = [showResult $ clusters numberOfClusters numberOfIterations | numberOfClusters <- [5, 7, 9, 10, 12, 15], numberOfIterations <- [1, 10, 50, 100]]
+
+                                putStr $ unlines ([welcome, details] ++ resultStrings)

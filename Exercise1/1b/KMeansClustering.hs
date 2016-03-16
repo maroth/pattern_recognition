@@ -1,7 +1,7 @@
-module KMeansClustering where 
+module KMeansClustering(calculate, Letter(..), value, feature) where 
 
 import Data.Function (on)
-import Data.List (minimumBy, maximumBy, groupBy, transpose, delete)
+import Data.List (maximumBy, groupBy, transpose, delete)
 
 --data type
 data Letter = Letter Int [Float] deriving (Show)
@@ -12,7 +12,13 @@ value (Letter val _ ) = val
 feature :: Letter -> [Float]
 feature (Letter _ feat ) = feat
 
---K-Means Clustering
+--K-Means Clustering (take a list of letters, a number of clusters and of iterations, and return a list of clusters)
+calculate :: [Letter] -> Int -> Int -> [[Letter]]
+calculate letters numberOfClusters numberOfIterations = clusters where
+    centers = initialClusterCenters letters numberOfClusters
+    clusters = cluster letters centers numberOfIterations
+
+--recursive method for clustering
 cluster :: [Letter] -> [[Float]] -> Int -> [[Letter]]
 cluster letters clusterCenters 0 = makeClusters letters clusterCenters
 cluster letters clusterCenters remainingIterations = cluster letters newClusterCenters (pred remainingIterations) where
@@ -33,8 +39,8 @@ clusterCenter items = map (normalize . sum) $ transpose $ map feature items wher
 nearestCluster :: [[Float]] -> Letter -> [Float]
 nearestCluster [] _ = []
 nearestCluster (singleCluster:[]) _ = singleCluster
-nearestCluster clusterCenters letter = fst $ minimum [(clusterCenter, distanceTo clusterCenter) | clusterCenter <- clusterCenters] where
-    distanceTo clusterCenter = minkowskiDistance 2 (feature letter) clusterCenter
+nearestCluster clusterCenters letter = fst $ minimum [(center, distanceTo center) | center <- clusterCenters] where
+    distanceTo center = minkowskiDistance 2 (feature letter) center
 
 --make clusters by assigning each letter to its closest cluster center
 makeClusters :: [Letter] -> [[Float]] -> [[Letter]]
@@ -65,9 +71,4 @@ maxDistance letters fromLetter = fst $ maximumBy (compare `on` snd) lettersAndDi
     lettersAndDistance = [(letter, distanceTo letter) | letter <- letters] 
     distanceTo letter = minkowskiDistance 2 letter fromLetter
 
-
---parsing
-toLetter :: [String] -> Letter
-toLetter [] = error "empty list"
-toLetter (l:f) = Letter (read l :: Int) (map (\x -> read x :: Float) f)
 

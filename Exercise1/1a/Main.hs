@@ -61,6 +61,8 @@ main = do
     let csvTrainingSet = parseFile trainFile
     let csvTestSet = parseFile testFile
 
+    let welcome = "classification with K-Nearest Neighbor..."
+
     case csvTrainingSet of 
         Left trainError  -> do putStrLn "Error parsing Training CSV"
                                print trainError
@@ -68,9 +70,9 @@ main = do
             Left testError -> do putStrLn "Error parsing Test CSV"
                                  print testError
             Right test -> do let toSet csv = [toLetter x | x <- csv, x /= [""]]
-                             let testSetSize = 100
+                             let testSetSize = 40
                              let trainSetSize = length train
                              let showResult minkowskiParam k = "Accuracy for K = " ++ (show k) ++ " and Minkowski Parameter = " ++ (show minkowskiParam) ++ ": " ++ show (calculate (toSet (take trainSetSize train)) (toSet (take testSetSize test)) k minkowskiParam)
                              let resultStrings = [showResult minkowskiParam k | k <- [1, 3, 5, 10, 15], minkowskiParam <- [1, 2]]
                              let details = "Test set size: " ++ show testSetSize ++ ", Train set size: " ++ show trainSetSize
-                             putStr $ unlines ([details] ++ resultStrings)
+                             putStr $ unlines ([welcome, details] ++ resultStrings)
