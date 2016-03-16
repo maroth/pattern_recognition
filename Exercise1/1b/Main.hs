@@ -10,7 +10,7 @@ toLetter (l:f) = KMeansClustering.Letter (read l :: Int) (map (\x -> read x :: F
 
 main :: IO ()
 main = do
-    dataSetFile <- readFile "../all_short.csv"
+    dataSetFile <- readFile "../all.csv"
 
     let csvDataSet = parseCsv dataSetFile where
         parseCsv = parse csvFile "unknown" 
@@ -24,15 +24,15 @@ main = do
                                   print trainError
      
             Right dataSet -> do let toSet csv = [toLetter x | x <- csv, x /= [""]]
-                                let dataSetSize = 20
+                                let dataSetSize = 1000
                                 let welcome = "Clustering with K-Means Clustering"
                                 let details = "Data set size: " ++ show dataSetSize 
+                                let describe k i = "Clusters: " ++ show k ++ " Iterations: " ++ show i ++ "   -->   "
                                     
-                                let toSet csv = [toLetter x | x <- csv, x /= [""]]
-
-                                let clusters numberOfClusters numberOfIterations = KMeansClustering.calculate(toSet(take dataSetSize dataSet)) numberOfClusters numberOfIterations
-                                let showCluster cluster = [value letter | letter <- cluster]
-                                let showResult clusters = show $ concat [showCluster cluster | cluster <- clusters]
-                                let resultStrings = [showResult $ clusters numberOfClusters numberOfIterations | numberOfClusters <- [5, 7, 9, 10, 12, 15], numberOfIterations <- [0, 1, 10, 50, 100]]
+                                let clusters k i = KMeansClustering.calculate(toSet(take dataSetSize dataSet)) k i  
+                                let showCluster cluster = [value item | item <- cluster]
+                                let showResult k i resultClusters = (describe k i) ++ (show $ [showCluster item | item <- resultClusters])
+                                --let resultStrings = [showResult k i $ clusters k i | k <- [5, 7, 9, 10, 12, 15], i <- [0, 1, 10, 50, 100]]
+                                let resultStrings = [showResult k i $ clusters k i | k <- [10], i <- [100]]
 
                                 putStr $ unlines ([welcome, details] ++ resultStrings)

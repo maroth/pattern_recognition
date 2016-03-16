@@ -2,7 +2,8 @@
 module KMeansClustering.Internal where
 
 import Data.Function (on)
-import Data.List (maximumBy, minimumBy, groupBy, transpose, delete)
+import Data.List (maximumBy, minimumBy, groupBy, sortBy, transpose, delete)
+import Data.Ord (comparing)
 
 data Letter = Letter Int [Float] deriving (Show)
 
@@ -45,9 +46,8 @@ nearestCluster clusterCenters letter = fst $ minimumBy (\a b -> compare (snd a) 
 --make clusters by assigning each letter to its closest cluster center
 makeClusters :: [Letter] -> [[Float]] -> [[Letter]]
 makeClusters letters clusterCenters = [map fst item | item <- lettersGroupedByClosestCenter] where
-    lettersGroupedByClosestCenter = groupBy equalClosestCenter lettersAndClosestCenters
-    lettersAndClosestCenters = [(letter, nearestCluster clusterCenters letter) | letter <- letters]
-    equalClosestCenter a b =  snd a == snd b
+    lettersGroupedByClosestCenter = groupBy ((==) `on` snd) (sortBy (comparing snd) lettersAndClosestCenters)
+    lettersAndClosestCenters = [(letter, (nearestCluster clusterCenters letter)) | letter <- letters]
 
 --return a list of cluster centers using spanning cluster center selection
 initialClusterCenters :: [Letter] -> Int -> [[Float]]
