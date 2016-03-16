@@ -7,6 +7,12 @@ import Data.Ord (comparing)
 
 data Letter = Letter Int [Float] deriving (Show)
 
+instance Eq Letter where
+    (Letter v1 _) == (Letter v2 _) = v1 == v2
+
+instance Ord Letter where
+    (Letter v1 _) `compare` (Letter v2 _) = compare v1 v2
+
 value :: Letter -> Int
 value (Letter val _ ) = val
 
@@ -18,6 +24,7 @@ calculate :: [Letter] -> Int -> Int -> [[Letter]]
 calculate letters numberOfClusters numberOfIterations = clusters where
     centers = initialClusterCenters letters numberOfClusters
     clusters = cluster letters centers numberOfIterations
+
 
 --recursive method for clustering
 cluster :: [Letter] -> [[Float]] -> Int -> [[Letter]]
@@ -41,7 +48,7 @@ nearestCluster :: [[Float]] -> Letter -> [Float]
 nearestCluster [] _ = []
 nearestCluster (singleCluster:[]) _ = singleCluster
 nearestCluster clusterCenters letter = fst $ minimumBy (\a b -> compare (snd a) (snd b)) [(center, distanceTo center) | center <- clusterCenters] where
-    distanceTo center = minkowskiDistance 2 (feature letter) center
+    distanceTo center = minkowskiDistance 1 (feature letter) center
 
 --make clusters by assigning each letter to its closest cluster center
 makeClusters :: [Letter] -> [[Float]] -> [[Letter]]
