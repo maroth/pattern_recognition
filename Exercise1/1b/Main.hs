@@ -33,6 +33,6 @@ main = do
                                 let clusters numberOfClusters numberOfIterations = KMeansClustering.calculate(toSet(take dataSetSize dataSet)) numberOfClusters numberOfIterations
                                 let showCluster cluster = [value letter | letter <- cluster]
                                 let showResult clusters = show $ concat [showCluster cluster | cluster <- clusters]
-                                let resultStrings = [showResult $ clusters numberOfClusters numberOfIterations | numberOfClusters <- [5, 7, 9, 10, 12, 15], numberOfIterations <- [1, 10, 50, 100]]
+                                let resultStrings = [showResult $ clusters numberOfClusters numberOfIterations | numberOfClusters <- [5, 7, 9, 10, 12, 15], numberOfIterations <- [0, 1, 10, 50, 100]]
 
                                 putStr $ unlines ([welcome, details] ++ resultStrings)

@@ -16,7 +16,7 @@ executable ex1
 
 test-suite test-ex1
   type:                exitcode-stdio-1.0
-  main-is:             TestKMeansClustering.hs
+  main-is:             Main.hs
   build-depends:       base >=4.7 && <4.8,
                        test-framework,
                        test-framework-hunit,
