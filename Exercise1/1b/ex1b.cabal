@@ -7,7 +7,7 @@ maintainer:          markus.roth1@students.unibe.ch
 build-type:          Simple
 cabal-version:       >=1.10
 
-executable ex1
+executable ex1b
   ghc-options:         -Wall 
   main-is:             Main.hs
   build-depends:       base >=4.7 && <4.8,

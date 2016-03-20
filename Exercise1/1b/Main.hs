@@ -24,15 +24,16 @@ main = do
                                   print trainError
      
             Right dataSet -> do let toSet csv = [toLetter x | x <- csv, x /= [""]]
-                                let dataSetSize = 50
+                                let dataSetSize = 30
                                 let welcome = "Clustering with K-Means Clustering"
                                 let details = "Data set size: " ++ show dataSetSize 
                                 let describe k i = "Clusters: " ++ show k ++ " Iterations: " ++ show i ++ "   -->   "
+                                let indexes clusters = "C-Index: " ++ show (c_index clusters) ++ " Goldman Kruskal Index: " ++ show (goldman_kruskal_index clusters)
                                     
                                 let clusters k i = KMeansClustering.calculate(toSet(take dataSetSize dataSet)) k i  
-                                let showCluster cluster = [value item | item <- cluster]
-                                let showResult k i resultClusters = (describe k i) ++ (show $ [showCluster item | item <- resultClusters])
-                                --let resultStrings = [showResult k i $ clusters k i | k <- [5, 7, 9, 10, 12, 15], i <- [0, 1, 10, 50, 100]]
-                                let resultStrings = [showResult k i $ clusters k i | k <- [10], i <- [10, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]]
+                                let showCluster c = [value item | item <- c ]
+                                let showResult resultClusters = show $ [showCluster item | item <- resultClusters]
+                                let showIndexes k i resultClusters = (describe k i) ++ (indexes resultClusters) ++ "    Clusters: "++ (showResult resultClusters)
+                                let resultStrings = [showIndexes k i $ clusters k i | k <- [5, 7, 9, 10, 12, 15], i <- [0, 1, 10, 50, 100]]
 
                                 putStr $ unlines ([welcome, details] ++ resultStrings)

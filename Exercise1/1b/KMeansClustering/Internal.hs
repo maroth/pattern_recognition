@@ -8,7 +8,7 @@ import Data.Ord (comparing)
 data Letter = Letter Int [Float] deriving (Show)
 
 instance Eq Letter where
-    (Letter v1 _) == (Letter v2 _) = v1 == v2
+    (Letter v1 f1) == (Letter v2 f2) = v1 == v2 && f1 == f2
 
 instance Ord Letter where
     (Letter v1 _) `compare` (Letter v2 _) = compare v1 v2
@@ -24,7 +24,6 @@ calculate :: [Letter] -> Int -> Int -> [[Letter]]
 calculate letters numberOfClusters numberOfIterations = clusters where
     centers = initialClusterCenters letters numberOfClusters
     clusters = cluster letters centers numberOfIterations
-
 
 --recursive method for clustering
 cluster :: [Letter] -> [[Float]] -> Int -> [[Letter]]
@@ -81,5 +80,7 @@ maxDistance letters fromLetter = fst $ maximumBy (compare `on` snd) lettersAndDi
     lettersAndDistance = [(letter, distanceTo letter) | letter <- letters] 
     distanceTo letter = minkowskiDistance 2 letter fromLetter
 
-
-
+--checks if some items are in the same cluster
+inSameCluster :: [[Letter]] -> [Letter] -> Bool
+inSameCluster clusters letters = foldl (||) False [ contains cluster | cluster <- clusters] where 
+    contains c = foldl (&&) True [ elem l c | l <- letters]
